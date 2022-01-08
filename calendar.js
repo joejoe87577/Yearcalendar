@@ -12,9 +12,9 @@ function Calendar(elem, opt) {
 
         this.options = {
             start: !isNaN(parseInt(opt.start)) ? parseInt(opt.start) : new Date().getFullYear(),
+            data: opt.data != null ? opt.data : null,
             lang: opt.lang != null ? opt.lang : 'en',
             header: opt.header != null ? opt.header : true,
-            // see https://tc39.es/ecma402/#datetimeformat-objects
             dayDateTimeFormat: opt.dayDateTimeFormat != null ? opt.dayDateTimeFormat : { day: '2-digit', weekday: 'short' },
             monthDateTimeFormat: opt.monthDateTimeFormat != null ? opt.monthDateTimeFormat : { month: 'long' },
             headerDateTimeFormat: opt.headerDateTimeFormat != null ? opt.headerDateTimeFormat : { year: 'numeric' },
@@ -26,12 +26,13 @@ function Calendar(elem, opt) {
         console.debug('used options: ' + JSON.stringify(this.options));
 
         this.currentYear = this.options.start;
-
         this.render();
     }
 
     this.render = function () {
         console.debug('render called for year ' + this.currentYear);
+
+        this.evaluateData();
 
         // remove all childElements inside of calendar div
         while (this.element.firstChild) {
@@ -124,14 +125,64 @@ function Calendar(elem, opt) {
         dayDiv.day = dayDate.getDate();
 
         var dayDivSpan = document.createElement('span');
+        dayDivSpan.classList.add('day-text');
         dayDivSpan.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(dayDate);
 
         dayDiv.appendChild(dayDivSpan);
+
+        var dayEvents = [];
+        var isStart = false;
+        var isEnd = false;
+        if (this.data != null && this.data[dayDate.getDateComponent()]) {
+            dayEvents = this.data[dayDate.getDateComponent()];
+            if (this.data[dayDate.getDateComponent().addDays(-1)] == undefined) {
+                isStart = true;
+            }
+            if (this.data[dayDate.getDateComponent().addDays(1)] === undefined)
+                isEnd = true;
+        }
+
+        if (dayEvents.length > 0) {
+            dayDiv.dayEvents = dayEvents;
+            dayDivSpan = document.createElement('span');
+            dayDivSpan.classList.add('day-event-badge');
+            if (isStart) {
+                dayDivSpan.classList.add('day-event-badge-start');
+            }
+            if (isEnd) {
+                dayDivSpan.classList.add('day-event-badge-end');
+            }
+            dayDivSpan.innerText = dayEvents.length;
+
+            dayDiv.appendChild(dayDivSpan);
+        }
 
         if (this.options.onDayClick != null) {
             dayDiv.addEventListener('click', this.options.onDayClick);
         }
         return dayDiv;
+    }
+
+    this.evaluateData = function () {
+        console.debug('evaluating data');
+        console.debug('data is function ' + (this.options.data instanceof Function).toString())
+
+        var evaluated = null;
+        if (this.options.data instanceof Function) {
+            evaluated = this.options.data(this.currentYear);
+        }
+        else {
+            evaluated = this.options.data;
+        }
+
+        this.data = [];
+        for (i = 0; i < evaluated.length; i++) {
+            if (this.data[new Date(evaluated[i].date).getDateComponent()] == null)
+                this.data[new Date(evaluated[i].date).getDateComponent()] = [];
+            this.data[new Date(evaluated[i].date).getDateComponent()].push(evaluated[i]);
+        }
+
+        console.debug('data evaluated');
     }
 
     this.changeYear = function (year) {
@@ -158,5 +209,15 @@ Date.prototype.daysOfMonth = function () {
 
 Date.prototype.addDays = function (days) {
     var date = this.setDate(this.getDate() + days);
-    return date;
+    return new Date(date);
+}
+
+Date.prototype.dateEquals = function (date) {
+    return this.getFullYear() == date.getFullYear() &&
+        this.getMonth() == date.getMonth() &&
+        this.getDate() == date.getDate();
+}
+
+Date.prototype.getDateComponent = function () {
+    return new Date(this.getFullYear(), this.getMonth(), this.getDate());
 }

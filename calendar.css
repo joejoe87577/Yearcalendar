@@ -36,7 +36,22 @@
     font-weight: bold;
 }
 
-.day:hover:not(.day-filler) {
-    font-style: italic;
-    text-decoration: underline;
+.day-event-badge {
+    background-color: #ff0000aa;
+    color: white;
+    margin: 0 .25rem;
+    min-width: 1rem;
+    text-align: center;
+    display: inline-block;
+    min-height: 1rem;
+}
+
+.day-event-badge-start {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+.day-event-badge-end {
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
 }
