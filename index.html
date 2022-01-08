@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Page Title</title>
+    <link href="calendar.css" rel="stylesheet" />
+    <script src="calendar.js"></script>
+    <script>
+        function init() {
+            var calendar = new Calendar(
+                document.getElementById('calendar'),
+                {
+                    lang: 'en',
+                    header: false,
+                    dayDateTimeFormat: {
+                        day: '2-digit',
+                        weekday: 'short'
+                    },
+                    monthDateTimeFormat: {
+                        month: 'long'
+                    },
+                    onDayClick: function (event) {
+                        console.log('onDayClick ' + event.currentTarget.date);
+                    },
+                    onYearChange: function (calendar, previousYear, newYear) {
+                        console.log('onYearChange previousYear ' + previousYear + ' newYear ' + newYear);
+                    },
+                    onYearChanged: function (calendar, previousYear, newYear) {
+                        console.log('onYearChanged previousYear ' + previousYear + ' newYear ' + newYear);
+                    }
+                }
+            );
+        }
+    </script>
+</head>
+
+<body onload="init();">
+
+    <div id="calendar">
+        <p>Calendar</p>
+    </div>
+
+</body>
+
+</html>

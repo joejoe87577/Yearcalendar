@@ -1,0 +1,42 @@
+.calendar {
+    margin: 0 auto;
+    display: inline-block;
+    font-family: monospace;
+}
+
+.year-header {
+    font-size: 2rem;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.month {
+    display: inline-block;
+    vertical-align: top;
+    min-width: 5rem;
+}
+
+.month-header {
+    min-height: 1rem;
+    user-select: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.day {
+    min-height: 1rem;
+    user-select: none;
+}
+
+.day:not(.day-filler) {
+    cursor: default;
+}
+
+.day-weekend {
+    font-weight: bold;
+}
+
+.day:hover:not(.day-filler) {
+    font-style: italic;
+    text-decoration: underline;
+}
