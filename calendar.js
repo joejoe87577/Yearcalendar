@@ -74,6 +74,7 @@ function Calendar(elem, opt) {
         for (var i = 0; i < preparedData.maxDays; i++) {
             tr = document.createElement('tr');
             for (var j = 0; j < 12; j++) {
+                // render weekNumber column
                 if (this.options.weeknumber) {
                     td = document.createElement('td');
                     td.classList.add('weeknumber-column');
@@ -83,22 +84,24 @@ function Calendar(elem, opt) {
                     tr.appendChild(td);
                 }
 
+                // render date column
                 td = document.createElement('td');
+                td.classList.add('day-column');
                 if (preparedData[j].length > i) {
                     td.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(preparedData[j][i].date);
-                    td.classList.add('day-column');
                     if (preparedData[j][i].date.isWeekend()) {
                         td.classList.add('day-weekend');
                     }
                 }
                 tr.appendChild(td);
 
+                // render event column
                 td = document.createElement('td');
+                td.classList.add('event-column');
                 if (preparedData[j].length > i && preparedData[j][i].date.getMonth() == j) {
                     if (preparedData[j][i].events != null && preparedData[j][i].events.length > 0) {
                         td.appendChild(this.options.renderEvents(preparedData[j][i].date, preparedData[j][i].events, this.options.onDayClick));
                     }
-                    td.classList.add('event-column');
                     if (preparedData[j][i].date.isWeekend()) {
                         td.classList.add('day-weekend');
                     }
@@ -170,9 +173,13 @@ function Calendar(elem, opt) {
     }
 
     this.prepare = function(year) {
+        console.debug('preparing calendar dates for year ' + year);
+
         var res = [];
-        var date = new Date(year, 0, 1);
-        var curMonth = 0;
+        var date = new Date(year, 0, 1),
+            weekDateTmp;
+        var curMonth = 0,
+            curWeek, sameWeekUntil;
         var maxLength = 0;
         var dayEvents;
 
@@ -186,8 +193,21 @@ function Calendar(elem, opt) {
                     dayEvents = this.data[date.getDateComponent()];
                 }
 
-                res[curMonth].push({ date: date, weekday: date.getDay(), weeknumber: date.getWeekNumber(), events: dayEvents });
+                if (date.getWeekNumber() != curWeek) {
+                    curWeek = date.getWeekNumber();
+                    sameWeekUntil = 0;
+                    weekDateTmp = date;
+                }
+
+                while (weekDateTmp.getWeekNumber() == curWeek) {
+                    sameWeekUntil++;
+                    weekDateTmp = weekDateTmp.addDays(1);
+                }
+
+                res[curMonth].push({ date: date, weekday: date.getDay(), weeknumber: date.getWeekNumber(), sameWeek: sameWeekUntil != null ? sameWeekUntil : null, events: dayEvents });
                 date = date.addDays(1);
+
+                sameWeekUntil = null;
             }
 
             if (res[curMonth].length > maxLength)
@@ -203,7 +223,6 @@ function Calendar(elem, opt) {
 
     this.evaluateData = function() {
         console.debug('evaluating data');
-        console.debug('data is function ' + (this.options.data instanceof Function).toString())
 
         var evaluated = null;
         if (this.options.data instanceof Function) {
@@ -213,10 +232,12 @@ function Calendar(elem, opt) {
         }
 
         this.data = [];
-        for (i = 0; i < evaluated.length; i++) {
-            if (this.data[new Date(evaluated[i].date).getDateComponent()] == null)
-                this.data[new Date(evaluated[i].date).getDateComponent()] = [];
-            this.data[new Date(evaluated[i].date).getDateComponent()].push(evaluated[i]);
+        if (evaluated != undefined && evaluated != null) {
+            for (i = 0; i < evaluated.length; i++) {
+                if (this.data[new Date(evaluated[i].date).getDateComponent()] == null)
+                    this.data[new Date(evaluated[i].date).getDateComponent()] = [];
+                this.data[new Date(evaluated[i].date).getDateComponent()].push(evaluated[i]);
+            }
         }
 
         console.debug('data evaluated');
@@ -233,6 +254,8 @@ function Calendar(elem, opt) {
     }
 
     this.changeYear = function(year) {
+        console.debug('changing year to ' + year);
+
         var previousYear = this.currentYear;
         var con = true;
         if (this.options.onYearChange != null) {
@@ -249,6 +272,8 @@ function Calendar(elem, opt) {
         if (this.options.onYearChanged != null) {
             this.options.onYearChanged(this, previousYear, year);
         }
+
+        console.debug('changed year to ' + year);
     }
 
     this.init(opt);
