@@ -1,6 +1,4 @@
-.calendar {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+.calendar {}
 
 .year-header {
     text-align: center;
@@ -13,26 +11,33 @@
 .button-next {}
 
 .event-column {
+    border-top-width: 1px !important;
     border-right-width: 1px !important;
+    border-bottom-width: 1px !important;
     text-align: right;
 }
 
 .day-column {
+    border-top-width: 1px !important;
     border-left-width: 1px !important;
+    border-bottom-width: 1px !important;
     white-space: nowrap;
 }
 
 .weeknumber-column {
+    color: darkgray;
+    border-top-width: 1px !important;
     border-left-width: 1px !important;
-    white-space: nowrap;
+    vertical-align: top;
+    border-bottom-width: 1px;
 }
 
 .day-weekend {
-    background-color: #ebebeb;
-    font-weight: bold;
+    background-color: lightgray;
 }
 
 .calendar table {
+    border-bottom: 1px solid black;
     border-collapse: collapse;
     table-layout: fixed;
     width: 100%;
@@ -46,9 +51,9 @@
 .calendar td {
     border-color: black;
     border-style: solid;
-    border-top-width: 1px;
+    border-top-width: 0;
     border-right-width: 0;
-    border-bottom-width: 1px;
+    border-bottom-width: 0;
     border-left-width: 0;
     padding: .25rem .5rem;
 }
