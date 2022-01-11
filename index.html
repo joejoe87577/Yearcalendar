@@ -8,11 +8,13 @@
     <script>
         function init() {
             var calendar = new Calendar(
-                document.getElementById('calendar'),
-                {
+                document.getElementById('calendar'), {
                     start: 2022,
                     lang: 'en',
                     header: true,
+                    weeknumber: true,
+                    btnNextText: 'Next Year',
+                    btnPrevText: 'Previous Year',
                     dayDateTimeFormat: {
                         day: '2-digit',
                         weekday: 'short'
@@ -20,56 +22,46 @@
                     monthDateTimeFormat: {
                         month: 'long'
                     },
-                    onDayClick: function (event) {
+                    onDayClick: function(event) {
                         console.log('onDayClick ' + event.currentTarget.date);
-                        console.log('onDayClick ' + JSON.stringify(event.currentTarget.dayEvents));
+                        console.log('onDayClick ' + JSON.stringify(event.currentTarget.events));
                     },
-                    onYearChange: function (calendar, previousYear, newYear) {
+                    onYearChange: function(calendar, previousYear, newYear) {
                         console.log('onYearChange previousYear ' + previousYear + ' newYear ' + newYear);
                     },
-                    onYearChanged: function (calendar, previousYear, newYear) {
+                    onYearChanged: function(calendar, previousYear, newYear) {
                         console.log('onYearChanged previousYear ' + previousYear + ' newYear ' + newYear);
                     },
-                    data: function (year) {
+                    data: function(year) {
                         console.log('evaluating data for year ' + year);
-                        return [
-                            {
-                                date: "2022-01-01T00:00:00.000Z",
-                                title: "Event Title"
-                            },
-                            {
-                                date: "2022-01-01T00:00:00.000Z",
-                                title: "Event 3 Title"
-                            },
-                            {
-                                date: "2022-01-02T00:00:00.000Z",
-                                title: "Event 2 Title"
-                            },
-                            {
-                                date: "2022-01-03T00:00:00.000Z",
-                                title: "Event 4 Title"
-                            },
-                            {
-                                date: "2022-01-05T00:00:00.000Z",
-                                title: "Event 4 Title"
-                            },
-                            {
-                                date: "2022-01-06T00:00:00.000Z",
-                                title: "Event 4 Title"
-                            },
-                            {
-                                date: "2022-01-07T00:00:00.000Z",
-                                title: "Event 4 Title"
-                            },
-                            {
-                                date: "2022-01-08T00:00:00.000Z",
-                                title: "Event 4 Title"
-                            },
-                            {
-                                date: "2022-01-09T00:00:00.000Z",
-                                title: "Event 4 Title"
-                            }
-                        ];
+                        return [{
+                            date: "2022-01-01T00:00:00.000Z",
+                            title: "Event 1 Title"
+                        }, {
+                            date: "2022-01-01T00:00:00.000Z",
+                            title: "Event 2 Title"
+                        }, {
+                            date: "2022-01-02T00:00:00.000Z",
+                            title: "Event 3 Title"
+                        }, {
+                            date: "2022-01-03T00:00:00.000Z",
+                            title: "Event 4 Title"
+                        }, {
+                            date: "2022-01-05T00:00:00.000Z",
+                            title: "Event 5 Title"
+                        }, {
+                            date: "2022-01-06T00:00:00.000Z",
+                            title: "Event 6 Title"
+                        }, {
+                            date: "2022-01-07T00:00:00.000Z",
+                            title: "Event 7 Title"
+                        }, {
+                            date: "2022-01-08T00:00:00.000Z",
+                            title: "Event 8 Title"
+                        }, {
+                            date: "2022-01-09T00:00:00.000Z",
+                            title: "Event 9 Title"
+                        }];
                     }
                 }
             );

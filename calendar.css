@@ -1,57 +1,52 @@
 .calendar {
-    margin: 0 auto;
-    display: inline-block;
-    font-family: monospace;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .year-header {
-    font-size: 2rem;
     text-align: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-
-.month {
-    display: inline-block;
-    vertical-align: top;
-    min-width: 5rem;
+.btn-column {
+    text-align: center;
 }
 
-.month-header {
-    min-height: 1rem;
-    user-select: none;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.event-column {
+    border-right-width: 1px !important;
+    text-align: right;
 }
 
-.day {
-    min-height: 1rem;
-    user-select: none;
+.day-column {
+    border-left-width: 1px !important;
+    white-space: nowrap;
 }
 
-.day:not(.day-filler) {
-    cursor: default;
+.weeknumber-column {
+    border-left-width: 1px !important;
+    white-space: nowrap;
 }
 
 .day-weekend {
+    background-color: #ebebeb;
     font-weight: bold;
 }
 
-.day-event-badge {
-    background-color: #ff0000aa;
-    color: white;
-    margin: 0 .25rem;
-    min-width: 1rem;
-    text-align: center;
-    display: inline-block;
-    min-height: 1rem;
+.calendar table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
 }
 
-.day-event-badge-start {
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
+.calendar th {
+    border: 1px solid black;
+    padding: .25rem .5rem;
 }
 
-.day-event-badge-end {
-    border-bottom-left-radius: 1rem;
-    border-bottom-right-radius: 1rem;
+.calendar td {
+    border-color: black;
+    border-style: solid;
+    border-top-width: 1px;
+    border-right-width: 0;
+    border-bottom-width: 1px;
+    border-left-width: 0;
+    padding: .25rem .5rem;
 }

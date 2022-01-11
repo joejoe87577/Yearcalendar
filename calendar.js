@@ -5,7 +5,7 @@ function Calendar(elem, opt) {
         opt = {};
     }
 
-    this.init = function (options) {
+    this.init = function(options) {
         console.debug('init called');
         console.debug('init on element: ' + this.element);
         console.debug('init with options: ' + JSON.stringify(options));
@@ -15,12 +15,16 @@ function Calendar(elem, opt) {
             data: opt.data != null ? opt.data : null,
             lang: opt.lang != null ? opt.lang : 'en',
             header: opt.header != null ? opt.header : true,
+            weeknumber: opt.weeknumber != null ? opt.weeknumber : true,
+            btnNextText: opt.btnNextText != null ? opt.btnNextText : '>>',
+            btnPrevText: opt.btnPrevText != null ? opt.btnPrevText : '<<',
             dayDateTimeFormat: opt.dayDateTimeFormat != null ? opt.dayDateTimeFormat : { day: '2-digit', weekday: 'short' },
             monthDateTimeFormat: opt.monthDateTimeFormat != null ? opt.monthDateTimeFormat : { month: 'long' },
             headerDateTimeFormat: opt.headerDateTimeFormat != null ? opt.headerDateTimeFormat : { year: 'numeric' },
             onDayClick: opt.onDayClick != null ? opt.onDayClick : null,
             onYearChange: opt.onYearChange != null ? opt.onYearChange : null,
-            onYearChanged: opt.onYearChanged != null ? opt.onYearChanged : null
+            onYearChanged: opt.onYearChanged != null ? opt.onYearChanged : null,
+            renderEvents: opt.renderEvents != null ? renderEvents : this.renderEvents
         }
 
         console.debug('used options: ' + JSON.stringify(this.options));
@@ -29,7 +33,7 @@ function Calendar(elem, opt) {
         this.render();
     }
 
-    this.render = function () {
+    this.render = function() {
         console.debug('render called for year ' + this.currentYear);
 
         this.evaluateData();
@@ -42,136 +46,165 @@ function Calendar(elem, opt) {
         this.element.classList.add('calendar');
         this.element.calendar = this;
 
+        var preparedData = this.prepare(this.currentYear);
+
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var tbody = document.createElement('tbody');
+        var tr, th, td, span;
+
+
         if (this.options.header)
-            this.renderHeader();
+            thead.appendChild(this.renderHeader());
 
-        var monthDiv, monthHeaderDiv, dayDiv;
-        var monthDate;
-        for (i = 0; i < 12; i++) {
-            monthDiv = document.createElement('div');
-            monthDiv.classList.add('month', 'month-' + i);
+        var date = new Date(this.currentYear, 0, 1);
 
-            monthDate = new Date(this.currentYear, i, 1);
-
-            monthHeaderDiv = document.createElement('div');
-            monthHeaderDiv.classList.add('month-header');
-            monthHeaderDiv.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.monthDateTimeFormat).format(monthDate);
-            monthDiv.appendChild(monthHeaderDiv);
-
-            for (j = 1; j <= new Date(this.currentYear, i, 1).daysOfMonth(); j++) {
-                monthDiv.appendChild(this.renderDay(new Date(this.currentYear, i, j)));
-            }
-
-            if (new Date(this.currentYear, i, 1).daysOfMonth() < 31) {
-                for (j = 0; j < 31 - new Date(this.currentYear, i, 1).daysOfMonth(); j++) {
-                    dayDiv = document.createElement('div');
-                    dayDiv.classList.add('day', 'day-filler');
-                    monthDiv.appendChild(dayDiv);
-                }
-            }
-
-            this.element.appendChild(monthDiv);
+        // create month headers
+        tr = document.createElement('tr');
+        for (var i = 0; i < 12; i++) {
+            th = document.createElement('th');
+            th.innerText = innerText = new Intl.DateTimeFormat(this.options.lang, this.options.monthDateTimeFormat).format(new Date(this.currentYear, i, 1));
+            th.colSpan = this.options.weeknumber ? 3 : 2;
+            tr.appendChild(th);
         }
+        thead.appendChild(tr);
+
+
+        // render days
+        for (var i = 0; i < preparedData.maxDays; i++) {
+            tr = document.createElement('tr');
+            for (var j = 0; j < 12; j++) {
+                if (this.options.weeknumber) {
+                    td = document.createElement('td');
+                    td.classList.add('weeknumber-column');
+                    if (preparedData[j].length > i) {
+                        td.innerText = preparedData[j][i].weeknumber;
+                    }
+                    tr.appendChild(td);
+                }
+
+                td = document.createElement('td');
+                if (preparedData[j].length > i) {
+                    td.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(preparedData[j][i].date);
+                    td.classList.add('day-column');
+                    if (preparedData[j][i].date.isWeekend()) {
+                        td.classList.add('day-weekend');
+                    }
+                }
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                if (preparedData[j].length > i && preparedData[j][i].date.getMonth() == j) {
+                    if (preparedData[j][i].events != null && preparedData[j][i].events.length > 0) {
+                        td.appendChild(this.options.renderEvents(preparedData[j][i].date, preparedData[j][i].events, this.options.onDayClick));
+                    }
+                    td.classList.add('event-column');
+                    if (preparedData[j][i].date.isWeekend()) {
+                        td.classList.add('day-weekend');
+                    }
+                }
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        }
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        this.element.appendChild(table);
 
         console.debug('render complete for year ' + this.currentYear);
     }
 
-    this.renderHeader = function () {
+    this.renderHeader = function() {
         console.debug('renderHeader called for year ' + this.currentYear);
 
-        var yearHeader = document.createElement('div');
-        yearHeader.classList.add('year-header');
-        yearHeader.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.headerDateTimeFormat).format(new Date(this.currentYear, 0, 1));
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.colSpan = 4 * (this.options.weeknumber ? 3 : 2);
+        tr.appendChild(td);
 
+        td = document.createElement('td');
+        td.classList.add('btn-column')
+        td.colSpan = this.options.weeknumber ? 3 : 2;
         var btnPrev = document.createElement('input');
         btnPrev.type = 'button';
-        btnPrev.value = '<<';
+        btnPrev.value = this.options.btnPrevText;
         btnPrev.calendar = this;
-        btnPrev.addEventListener('click', function (event) {
+        btnPrev.addEventListener('click', function(event) {
             event.currentTarget.calendar.changeYear(event.currentTarget.calendar.currentYear - 1);
         });
-        yearHeader.appendChild(btnPrev);
+        td.appendChild(btnPrev);
+        tr.appendChild(td);
 
+
+        var th = document.createElement('th');
+        th.colSpan = 2 * (this.options.weeknumber ? 3 : 2);
+        th.classList.add('year-header');
+        var span = document.createElement('span');
+        span.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.headerDateTimeFormat).format(new Date(this.currentYear, 0, 1));
+        th.appendChild(span);
+        tr.appendChild(th);
+
+        td = document.createElement('td');
+        td.classList.add('btn-column')
+        td.colSpan = this.options.weeknumber ? 3 : 2;
         var btnNext = document.createElement('input');
         btnNext.type = 'button';
-        btnNext.value = '>>';
+        btnNext.value = this.options.btnNextText;
         btnNext.calendar = this;
-        btnNext.addEventListener('click', function (event) {
+        btnNext.addEventListener('click', function(event) {
             event.currentTarget.calendar.changeYear(event.currentTarget.calendar.currentYear + 1);
         });
-        yearHeader.appendChild(btnNext);
+        td.appendChild(btnNext);
+        tr.appendChild(td);
 
-        this.element.appendChild(yearHeader);
+        td = document.createElement('td');
+        td.colSpan = 4 * (this.options.weeknumber ? 3 : 2);
+        tr.appendChild(td);
+
+        return tr;
     }
 
-    this.renderDay = function (dayDate) {
-        console.debug('renderDay called for date ' + dayDate);
+    this.prepare = function(year) {
+        var res = [];
+        var date = new Date(year, 0, 1);
+        var curMonth = 0;
+        var maxLength = 0;
+        var dayEvents;
 
-        var dayDiv = document.createElement('div');
-        dayDiv.classList.add('day', 'day-' + j);
+        while (curMonth < 12) {
+            date = new Date(year, curMonth, 1);
+            res[curMonth] = [];
 
-        // check if day is weekend
-        if (dayDate.getDay() == 0 || dayDate.getDay() == 6) {
-            dayDiv.classList.add('day-weekend');
-            dayDiv.weekend = true;
-        } else {
-            dayDiv.dataset['weekend'] = false;
-            dayDiv.weekend = false;
-        }
+            while (date.getMonth() == curMonth) {
+                dayEvents = null;
+                if (this.data != null && this.data[date.getDateComponent()]) {
+                    dayEvents = this.data[date.getDateComponent()];
+                }
 
-        dayDiv.date = dayDate;
-        dayDiv.year = dayDate.getFullYear();
-        dayDiv.month = dayDate.getMonth();
-        dayDiv.day = dayDate.getDate();
-
-        var dayDivSpan = document.createElement('span');
-        dayDivSpan.classList.add('day-text');
-        dayDivSpan.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(dayDate);
-
-        dayDiv.appendChild(dayDivSpan);
-
-        var dayEvents = [];
-        var isStart = false;
-        var isEnd = false;
-        if (this.data != null && this.data[dayDate.getDateComponent()]) {
-            dayEvents = this.data[dayDate.getDateComponent()];
-            if (this.data[dayDate.getDateComponent().addDays(-1)] == undefined) {
-                isStart = true;
+                res[curMonth].push({ date: date, weekday: date.getDay(), weeknumber: date.getWeekNumber(), events: dayEvents });
+                date = date.addDays(1);
             }
-            if (this.data[dayDate.getDateComponent().addDays(1)] === undefined)
-                isEnd = true;
+
+            if (res[curMonth].length > maxLength)
+                maxLength = res[curMonth].length;
+
+            curMonth++;
         }
 
-        if (dayEvents.length > 0) {
-            dayDiv.dayEvents = dayEvents;
-            dayDivSpan = document.createElement('span');
-            dayDivSpan.classList.add('day-event-badge');
-            if (isStart) {
-                dayDivSpan.classList.add('day-event-badge-start');
-            }
-            if (isEnd) {
-                dayDivSpan.classList.add('day-event-badge-end');
-            }
-            dayDivSpan.innerText = dayEvents.length;
+        res.maxDays = maxLength;
 
-            dayDiv.appendChild(dayDivSpan);
-        }
-
-        if (this.options.onDayClick != null) {
-            dayDiv.addEventListener('click', this.options.onDayClick);
-        }
-        return dayDiv;
+        return res;
     }
 
-    this.evaluateData = function () {
+    this.evaluateData = function() {
         console.debug('evaluating data');
         console.debug('data is function ' + (this.options.data instanceof Function).toString())
 
         var evaluated = null;
         if (this.options.data instanceof Function) {
             evaluated = this.options.data(this.currentYear);
-        }
-        else {
+        } else {
             evaluated = this.options.data;
         }
 
@@ -185,39 +218,56 @@ function Calendar(elem, opt) {
         console.debug('data evaluated');
     }
 
-    this.changeYear = function (year) {
+    this.renderEvents = function(date, events, onClick) {
+        var span = document.createElement('span');
+        span.innerText = events.length;
+        span.title = JSON.stringify(events);
+        span.date = date;
+        span.events = events;
+        span.addEventListener('click', onClick);
+        return span;
+    }
+
+    this.changeYear = function(year) {
         var previousYear = this.currentYear;
-        if (opt.onYearChange != null) {
-            opt.onYearChange(this, previousYear, year);
+        var con = true;
+        if (this.options.onYearChange != null) {
+            con = this.options.onYearChange(this, previousYear, year);
         }
+
+        if (con != undefined && !con)
+            return;
 
         this.currentYear = year;
 
         this.render();
 
-        if (opt.onYearChanged != null) {
-            opt.onYearChanged(this, previousYear, year);
+        if (this.options.onYearChanged != null) {
+            this.options.onYearChanged(this, previousYear, year);
         }
     }
 
     this.init(opt);
 }
 
-Date.prototype.daysOfMonth = function () {
-    return new Date(this.getFullYear(), this.getMonth() + 1, 0).getDate();
-}
-
-Date.prototype.addDays = function (days) {
-    var date = this.setDate(this.getDate() + days);
+Date.prototype.addDays = function(days) {
+    var date = new Date(this.getTime());
+    date = date.setDate(date.getDate() + days);
     return new Date(date);
 }
 
-Date.prototype.dateEquals = function (date) {
-    return this.getFullYear() == date.getFullYear() &&
-        this.getMonth() == date.getMonth() &&
-        this.getDate() == date.getDate();
-}
-
-Date.prototype.getDateComponent = function () {
+Date.prototype.getDateComponent = function() {
     return new Date(this.getFullYear(), this.getMonth(), this.getDate());
 }
+
+Date.prototype.isWeekend = function() {
+    return this.getDay() == 0 || this.getDay() == 6;
+}
+
+Date.prototype.getWeekNumber = function() {
+    var d = new Date(Date.UTC(this.getFullYear(), this.getMonth(), this.getDate()));
+    var dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+};
