@@ -127,7 +127,7 @@ function Calendar(elem, opt) {
         td.classList.add('btn-column')
         td.colSpan = this.options.weeknumber ? 3 : 2;
         var btn = document.createElement('input');
-        btn.classList.add('calendar-button button-prev');
+        btn.classList.add('calendar-button', 'button-prev');
         btn.type = 'button';
         btn.value = this.options.btnPrevText;
         btn.style.float = 'right';
@@ -151,7 +151,7 @@ function Calendar(elem, opt) {
         td.classList.add('btn-column')
         td.colSpan = this.options.weeknumber ? 3 : 2;
         btn = document.createElement('input');
-        btn.classList.add('calendar-button button-next');
+        btn.classList.add('calendar-button', 'button-next');
         btn.type = 'button';
         btn.value = this.options.btnNextText;
         btn.style.float = 'left';
