@@ -126,14 +126,16 @@ function Calendar(elem, opt) {
         td = document.createElement('td');
         td.classList.add('btn-column')
         td.colSpan = this.options.weeknumber ? 3 : 2;
-        var btnPrev = document.createElement('input');
-        btnPrev.type = 'button';
-        btnPrev.value = this.options.btnPrevText;
-        btnPrev.calendar = this;
-        btnPrev.addEventListener('click', function(event) {
+        var btn = document.createElement('input');
+        btn.classList.add('calendar-button button-prev');
+        btn.type = 'button';
+        btn.value = this.options.btnPrevText;
+        btn.style.float = 'right';
+        btn.calendar = this;
+        btn.addEventListener('click', function(event) {
             event.currentTarget.calendar.changeYear(event.currentTarget.calendar.currentYear - 1);
         });
-        td.appendChild(btnPrev);
+        td.appendChild(btn);
         tr.appendChild(td);
 
 
@@ -148,14 +150,16 @@ function Calendar(elem, opt) {
         td = document.createElement('td');
         td.classList.add('btn-column')
         td.colSpan = this.options.weeknumber ? 3 : 2;
-        var btnNext = document.createElement('input');
-        btnNext.type = 'button';
-        btnNext.value = this.options.btnNextText;
-        btnNext.calendar = this;
-        btnNext.addEventListener('click', function(event) {
+        btn = document.createElement('input');
+        btn.classList.add('calendar-button button-next');
+        btn.type = 'button';
+        btn.value = this.options.btnNextText;
+        btn.style.float = 'left';
+        btn.calendar = this;
+        btn.addEventListener('click', function(event) {
             event.currentTarget.calendar.changeYear(event.currentTarget.calendar.currentYear + 1);
         });
-        td.appendChild(btnNext);
+        td.appendChild(btn);
         tr.appendChild(td);
 
         td = document.createElement('td');
