@@ -91,7 +91,14 @@ function Calendar(elem, opt) {
                 if (preparedData[j].length > i) {
                     td = document.createElement('td');
                     td.classList.add('day-column');
-                    td.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(preparedData[j][i].date);
+                    if (preparedData[j][i].date.isToday()) {
+                        span = document.createElement('span');
+                        span.classList.add('day-today')
+                        span.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(preparedData[j][i].date);
+                        td.appendChild(span);
+                    } else {
+                        td.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(preparedData[j][i].date);
+                    }
                     if (preparedData[j][i].date.isWeekend()) {
                         td.classList.add('day-weekend');
                     }
@@ -298,6 +305,12 @@ Date.prototype.getDateComponent = function() {
 
 Date.prototype.isWeekend = function() {
     return this.getDay() == 0 || this.getDay() == 6;
+}
+
+Date.prototype.isToday = function() {
+    return this.getDateComponent().getFullYear() == new Date().getDateComponent().getFullYear() &&
+        this.getDateComponent().getMonth() == new Date().getDateComponent().getMonth() &&
+        this.getDateComponent().getDate() == new Date().getDateComponent().getDate();
 }
 
 Date.prototype.getWeekNumber = function() {
