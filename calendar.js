@@ -76,37 +76,43 @@ function Calendar(elem, opt) {
             for (var j = 0; j < 12; j++) {
                 // render weekNumber column
                 if (this.options.weeknumber) {
-                    td = document.createElement('td');
-                    td.classList.add('weeknumber-column');
-                    if (preparedData[j].length > i) {
+                    if (preparedData[j].length <= i) {
+                        td = document.createElement('td');
+                        tr.appendChild(td);
+                    } else if (preparedData[j].length > i && preparedData[j][i].sameWeek != null) {
+                        td = document.createElement('td');
+                        td.classList.add('weeknumber-column');
+                        td.rowSpan = preparedData[j][i].sameWeek;
                         td.innerText = preparedData[j][i].weeknumber;
+                        tr.appendChild(td);
                     }
-                    tr.appendChild(td);
                 }
 
-                // render date column
-                td = document.createElement('td');
-                td.classList.add('day-column');
                 if (preparedData[j].length > i) {
+                    td = document.createElement('td');
+                    td.classList.add('day-column');
                     td.innerText = new Intl.DateTimeFormat(this.options.lang, this.options.dayDateTimeFormat).format(preparedData[j][i].date);
                     if (preparedData[j][i].date.isWeekend()) {
                         td.classList.add('day-weekend');
                     }
-                }
-                tr.appendChild(td);
+                    tr.appendChild(td);
 
-                // render event column
-                td = document.createElement('td');
-                td.classList.add('event-column');
-                if (preparedData[j].length > i && preparedData[j][i].date.getMonth() == j) {
-                    if (preparedData[j][i].events != null && preparedData[j][i].events.length > 0) {
-                        td.appendChild(this.options.renderEvents(preparedData[j][i].date, preparedData[j][i].events, this.options.onDayClick));
+                    td = document.createElement('td');
+                    td.classList.add('event-column');
+                    if (preparedData[j][i].date.getMonth() == j) {
+                        if (preparedData[j][i].events != null && preparedData[j][i].events.length > 0) {
+                            td.appendChild(this.options.renderEvents(preparedData[j][i].date, preparedData[j][i].events, this.options.onDayClick));
+                        }
+                        if (preparedData[j][i].date.isWeekend()) {
+                            td.classList.add('day-weekend');
+                        }
                     }
-                    if (preparedData[j][i].date.isWeekend()) {
-                        td.classList.add('day-weekend');
-                    }
+                    tr.appendChild(td);
+                } else {
+                    td = document.createElement('td');
+                    td.colSpan = 2;
+                    tr.appendChild(td);
                 }
-                tr.appendChild(td);
             }
             tbody.appendChild(tr);
         }
@@ -199,7 +205,7 @@ function Calendar(elem, opt) {
                     weekDateTmp = date;
                 }
 
-                while (weekDateTmp.getWeekNumber() == curWeek) {
+                while (weekDateTmp.getWeekNumber() == curWeek && weekDateTmp.getMonth() == curMonth) {
                     sameWeekUntil++;
                     weekDateTmp = weekDateTmp.addDays(1);
                 }
@@ -245,6 +251,7 @@ function Calendar(elem, opt) {
 
     this.renderEvents = function(date, events, onClick) {
         var span = document.createElement('span');
+        span.classList.add('event-span');
         span.innerText = events.length;
         span.title = JSON.stringify(events);
         span.date = date;
