@@ -12,7 +12,7 @@
     <script src="calendar.js"></script>
     <script>
         function init() {
-            var calendar = new Calendar(document.getElementById('calendar'), { });
+            var calendar = new Calendar(document.getElementById('calendar'), { start: 2022 });
         }
     </script>
 </head>
@@ -94,6 +94,12 @@ function(date, events, onClick) {
 
 ## Data
 
+Event data must contain a property `date` with an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formatted date string.
+
+> If `new Date('your date string')` works, the calendar can read the date
+
+All other properties will stay attached to the `events` object.
+
 ```javascript
 [
     {
@@ -106,3 +112,21 @@ function(date, events, onClick) {
     }
 ]
 ```
+
+## Methods
+
+```javascript
+var calendar;
+function initCalendar() {
+    calendar = new Calendar(document.getElementById('calendar'), { start: 2022 });
+}
+
+function customCalledFunc() {
+    calendar.changeYear(calendar.currentYear + 1);
+}
+```
+
+|Name|Description|Note|
+|-|-|-|
+|`render()`|Destroys the current calendar and renders the current year again.|Data will always be fetched when `render` is called|
+|`changeYear(year)`|Changes the year and rerenders the calendar.|The current year can be read from `calendar.currentYear`|
